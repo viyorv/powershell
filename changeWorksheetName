@@ -1,0 +1,38 @@
+# Choose pollution type from below:
+# NO2_1g
+# CO_1g
+# O3_1g
+# PM2.5_1g
+# PM10_1g
+# SO2_1g
+
+$pollutionType = "SO2_1g"
+
+# $pollutionType with wildcards
+$sourceName = "*$pollutionType*"
+$fileFormat = ".txt"
+$sourceFile = $pollutionType + $fileFormat
+$rootPath = "C:\Users\user\Downloads\PollutionTest\test\" # put pollution data here
+$sourcePath = "C:\Users\user\Downloads\PollutionTest\sourceTxt\" # sourceFile will be saved here
+
+$pollutionFile = $sourcePath + $sourceFile    
+$file = Get-ChildItem -File -Recurse -Path $rootPath | Where-Object {$_.FullName -like $sourceName} | select -ExpandProperty FullName | Out-File $pollutionFile
+$pollutionFile = Get-Content $pollutionFile
+
+foreach ($xlsxPath in $pollutionFile) {
+    Add-Type -AssemblyName Microsoft.Office.Interop.Excel
+    $excel = new-object -ComObject Excel.application
+    $excel.Visible = $false
+    $excel.DisplayAlerts = $false
+    $workbook = $excel.Workbooks.Add($xlsxPath)
+    $workbook.name
+    $worksheet = $workbook.worksheets.item(1)
+    $worksheet.name
+    $worksheet.name = $pollutionType
+    $worksheet.name
+    $workbook.SaveAS($xlsxPath)
+    #$workbook.Close($true)
+    $excel.Quit()
+    [System.Runtime.Interopservices.Marshal]::ReleaseComObject($excel)
+    Remove-Variable excel
+}
